@@ -33,7 +33,7 @@ def cmd_query(args):
     for ev in Audit.tail(10): print(ev)
 
 def main():
-    p=argparse.ArgumentParser('llm-secgate'); sub=p.add_subparsers(dest='cmd')
+    p=argparse.ArgumentParser('ragshield'); sub=p.add_subparsers(dest='cmd')
     p1=sub.add_parser('index'); p1.add_argument('path'); p1.add_argument('--store',default='prov.sqlite'); p1.add_argument('--source',default='uploads'); p1.add_argument('--sensitivity',default='low'); p1.set_defaults(func=cmd_index)
     p2=sub.add_parser('query'); p2.add_argument('query'); p2.add_argument('--docs',default='./docs'); p2.add_argument('--config',default='firewall.yaml'); p2.add_argument('--store',default='prov.sqlite'); p2.add_argument('--show-decisions',action='store_true'); p2.set_defaults(func=cmd_query)
     args=p.parse_args(); 

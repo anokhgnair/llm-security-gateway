@@ -2,7 +2,7 @@
 
 ## [1.0.0] - 2026-10-08
 ### Added
-- LLM-SecGate local-first gateway identity and API.
+- RAGShield Gateway local-first gateway identity and API.
 - Local lexical RAG retrieval and malicious-document blocking.
 - Optional Ollama integration with safe fallback.
 - Output security, dashboard attack simulation, URL enforcement, and measured evaluation.

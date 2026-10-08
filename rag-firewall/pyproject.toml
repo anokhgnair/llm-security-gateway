@@ -3,12 +3,12 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llm-secgate"
+name = "ragshield-gateway"
 version = "0.4.1"
-description = "Local-first LLM security gateway for protecting AI applications and RAG pipelines against prompt injection, sensitive-data leakage, malicious documents, unsafe URLs, and unsafe model outputs."
+description = "Local-first security gateway for protecting RAG and LLM applications from prompt injection, indirect injection, sensitive-data leakage, malicious URLs, and unsafe retrieved content."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.9"
-authors = [{ name = "LLM-SecGate Maintainers" }]
+authors = [{ name = "RAGShield Gateway Maintainers" }]
 license = { text = "Apache-2.0" }
 dependencies = [
   "pyyaml>=6.0",
@@ -40,4 +40,5 @@ include = ["rag_firewall*"]
 [project.scripts]
 ragfw = "rag_firewall.cli:main"
 llm-secgate = "rag_firewall.cli:main"
+ragshield = "rag_firewall.cli:main"
 

@@ -48,7 +48,7 @@ def _unique(values: Iterable[str]) -> List[str]:
 
 
 class SecurityGateway:
-    """Local-first LLM-SecGate facade over the retained firewall engine."""
+    """RAGShield facade over the retained firewall engine."""
 
     def __init__(self, firewall: Optional[Firewall] = None, provenance: Optional[ProvenanceStore] = None,
                  retriever: Optional[LocalRetriever] = None, llm: Optional[OllamaClient] = None,

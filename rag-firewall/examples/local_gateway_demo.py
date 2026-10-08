@@ -1,4 +1,4 @@
-"""Run the LLM-SecGate local RAG demo without requiring Ollama."""
+"""Run the RAGShield Gateway local RAG demo without requiring Ollama."""
 from rag_firewall.gateway.core import SecurityGateway
 
 

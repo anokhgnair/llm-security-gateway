@@ -1,6 +1,6 @@
-# Contributing to LLM-SecGate
+# Contributing to RAGShield Gateway
 
-LLM-SecGate is a local-first LLM security gateway. Contributions should preserve its central security boundary: untrusted retrieved data is never treated as instructions.
+RAGShield Gateway is a local-first security gateway for RAG and LLM applications. Contributions should preserve its central security boundary: untrusted retrieved data is never treated as instructions.
 
 ## Development
 

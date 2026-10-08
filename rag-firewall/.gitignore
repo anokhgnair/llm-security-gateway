@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 
@@ -71,9 +72,12 @@ Thumbs.db
 # Local databases / provenance
 prov.sqlite
 audit.jsonl
+*.sqlite
+*.sqlite3
 
 # Logs
 *.log
+*.tmp
 
 # Example artifacts
 examples/demo/

@@ -32,10 +32,10 @@ jobs:
 
       - name: Build image
         run: |
-          IMAGE=ghcr.io/${{ github.repository_owner }}/llm-secgate:${{ steps.ver.outputs.ver }}
-          docker build -t "$IMAGE" -t ghcr.io/${{ github.repository_owner }}/llm-secgate:latest .
+          IMAGE=ghcr.io/${{ github.repository_owner }}/ragshield-llm-security-gateway:${{ steps.ver.outputs.ver }}
+          docker build -t "$IMAGE" -t ghcr.io/${{ github.repository_owner }}/ragshield-llm-security-gateway:latest .
 
       - name: Push image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/llm-secgate:${{ steps.ver.outputs.ver }}
-          docker push ghcr.io/${{ github.repository_owner }}/llm-secgate:latest
+          docker push ghcr.io/${{ github.repository_owner }}/ragshield-llm-security-gateway:${{ steps.ver.outputs.ver }}
+          docker push ghcr.io/${{ github.repository_owner }}/ragshield-llm-security-gateway:latest

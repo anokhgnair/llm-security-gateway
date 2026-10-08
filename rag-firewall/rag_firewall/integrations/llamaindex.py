@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2025 Tal Adari
 
-"""LlamaIndex integration for the LLM-SecGate document firewall.
+"""LlamaIndex integration for the RAGShield document firewall.
 
 Usage:
     from rag_firewall import Firewall

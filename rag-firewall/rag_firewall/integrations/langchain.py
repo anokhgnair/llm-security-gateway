@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2025 Tal Adari
 
-"""LangChain integration for the LLM-SecGate document firewall.
+"""LangChain integration for the RAGShield document firewall.
 
 Provides a drop-in retriever that wraps any LangChain retriever.
 Usage:
@@ -28,7 +28,7 @@ except Exception:  # pragma: no cover
 from ..firewall import Firewall
 
 class FirewallRetriever(BaseRetriever):
-    """Wraps any BaseRetriever and applies LLM-SecGate decisions."""
+    """Wraps any BaseRetriever and applies RAGShield decisions."""
     def __init__(self, base: BaseRetriever, firewall: Firewall, provenance_store: Optional[Any]=None):
         self.base = base
         self.firewall = firewall

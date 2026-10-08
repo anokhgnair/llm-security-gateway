@@ -1,6 +1,6 @@
-# LLM-SecGate Roadmap
+# RAGShield Gateway Roadmap
 
-LLM-SecGate is a local-first LLM security gateway focused on protecting the boundaries around retrieval and generation.
+RAGShield Gateway is a local-first security gateway focused on protecting the boundaries around retrieval and generation.
 
 ## Current Foundation
 

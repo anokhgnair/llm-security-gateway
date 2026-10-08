@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "LLM-SecGate Firewall Config v1",
+  "title": "RAGShield Gateway Firewall Config v1",
   "type": "object",
   "properties": {
     "gateway": { "type": "object", "additionalProperties": true },
