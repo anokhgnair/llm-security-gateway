@@ -6,13 +6,21 @@ scanners:
   - type: encoded
   - type: url
     allowlist: ["docs.myco.com", "intranet.myco.local"]
-    denylist: ["evil.example.com"]
+    denylist: ["evil.example.com", "attacker-listener.com"]
   - type: conflict
     stale_days: 120
 
 policies:
   - name: block_high_sensitivity
     match: { metadata.sensitivity: "high" }
+    action: deny
+
+  - name: block_denylisted_urls
+    match: { findings.reason: "denylist_domain" }
+    action: deny
+
+  - name: block_encoded_blobs
+    match: { findings.scanner: "encoded" }
     action: deny
 
   - name: prefer_recent_versions

@@ -245,6 +245,18 @@ Only firewall-approved context reaches the model. If Ollama is unavailable, RAGS
 
 A live Ollama model was not required for automated tests; the integration is covered with deterministic mocks.
 
+### Windows Ollama Setup
+
+Install Ollama from the official Ollama installer, then verify it from PowerShell:
+
+```powershell
+ollama --version
+ollama pull llama3.2:3b
+ollama run llama3.2:3b
+```
+
+Keep Ollama running locally, enable the provider in `gateway.yaml`, and start RAGShield Gateway. The dashboard health card should report the configured model as `READY`. Normal dashboard use does not require manually interacting with the Ollama prompt.
+
 ## Dashboard
 
 Start the gateway and open:

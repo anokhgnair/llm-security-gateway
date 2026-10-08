@@ -13,6 +13,10 @@ PATTERNS = [
     (r"your new instructions are", "instruction_override"),
     (r"(send|post|upload|contact).{0,40}(https?://|external|outside)", "external_exfiltration"),
     (r"(reveal|extract|send).{0,40}(secret|password|api key|system prompt)", "secret_extraction"),
+    (r"---+ ?(end|start) ?(system|retrieved|context|instructions?|prompt) ?---+", "delimiter_escape"),
+    (r"you are now (dan|an unrestricted|jailbroken)", "role_hijack"),
+    (r"\[?(system|human|assistant)\]?\s*:\s*(ignore|override|you are|disregard|say|output)", "role_hijack"),
+    (r"(disregard|override|forget) (all|any|the)? ?(previous|prior|system) instructions?", "instruction_override"),
 ]
 
 

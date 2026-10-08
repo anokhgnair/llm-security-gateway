@@ -74,7 +74,8 @@ class SecurityGateway:
                                      retrieval.get("top_k", 3), retrieval.get("chunk_size", 900)),
             llm=OllamaClient(llm_config.get("base_url", "http://127.0.0.1:11434"),
                              llm_config.get("model", "llama3.2:3b"),
-                             llm_config.get("enabled", False)),
+                             llm_config.get("enabled", False),
+                             llm_config.get("timeout", 30)),
             block_dangerous_urls=security.get("block_denylisted_urls", True),
         )
 
@@ -180,6 +181,7 @@ class SecurityGateway:
         }
 
     def query(self, text: str, documents: Optional[List[dict]] = None, source: str = "query") -> Dict[str, Any]:
+        started = time.perf_counter()
         request_id = str(uuid.uuid4())
         user_result = self.scan(text, source=source, request_id=request_id, query=text)
         if user_result["decision"] == "BLOCK":
@@ -188,51 +190,97 @@ class SecurityGateway:
                 "decision": "BLOCK", "risk_score": user_result["risk_score"],
                 "trust_score": user_result["trust_score"], "sources": [], "blocked_sources": [],
                 "threats": user_result["threats"], "security_explanation": user_result["explanation"],
-                "input": user_result, "documents": [], "safe_context": [], "context_blocked": 0,
+                "input": user_result, "documents": [], "retrieved_documents": [], "safe_context": [], "context_blocked": 0,
+                "findings": user_result["findings"], "sanitized": False,
+                "llm_provider": "ollama", "llm_model": getattr(self.llm, "model", None),
+                "llm_status": "skipped_input_blocked", "llm_called": False,
+                "llm_latency": 0.0, "total_latency": round((time.perf_counter() - started) * 1000, 3),
+                "stage_status": {"input_scan": "BLOCK", "retrieval": "SKIPPED", "document_scan": "SKIPPED", "ollama": "SKIPPED", "output_scan": "SKIPPED"},
+                "blocked_reason": user_result["explanation"],
             }
+        retrieval_started = time.perf_counter()
         retrieved = documents if documents is not None else self.retriever.retrieve(text)
+        retrieval_latency = round((time.perf_counter() - retrieval_started) * 1000, 3)
         safe_context = []
         safe_documents = []
         document_results = []
+        retrieved_documents = []
         blocked_sources = []
         all_threats = list(user_result["threats"])
+        document_started = time.perf_counter()
         for document in retrieved:
             metadata = document.get("metadata", {})
             result = self.scan(document.get("page_content", document.get("text", "")),
                                source=metadata.get("source", "retrieved"), metadata=metadata, request_id=request_id)
             document_results.append(result)
+            retrieved_documents.append({
+                "source": metadata.get("source", "retrieved"),
+                "chunk_id": metadata.get("chunk_id"),
+                "relevance": metadata.get("relevance", 0.0),
+                "decision": result["decision"],
+                "risk_score": result["risk_score"],
+                "trust_score": result["trust_score"],
+            })
             all_threats.extend(result["threats"])
             if result["decision"] == "BLOCK":
                 blocked_sources.append(metadata.get("source", "retrieved"))
             if result["decision"] != "BLOCK" and result.get("text") is not None:
                 safe_context.append(result["text"])
                 safe_documents.append({"page_content": result["text"], "metadata": metadata})
-        generated = self.llm.generate(text, safe_documents) if safe_documents else None
+        document_latency = round((time.perf_counter() - document_started) * 1000, 3)
+        llm_started = time.perf_counter()
+        llm_called = bool(safe_documents and getattr(self.llm, "enabled", False))
+        generated = self.llm.generate(text, safe_documents) if llm_called else None
+        llm_latency = getattr(self.llm, "last_latency_ms", round((time.perf_counter() - llm_started) * 1000, 3)) if llm_called else 0.0
+        llm_status = getattr(self.llm, "last_status", "disabled") if llm_called else ("skipped_no_trusted_context" if not safe_documents else "disabled")
         answer = generated or fallback_answer(text, safe_documents)
         output_result = self.scan(answer, source="llm_output", request_id=request_id, sanitize=True, query=text)
         if output_result["decision"] == "BLOCK":
             answer = "The generated response was blocked by the output security layer."
         elif output_result.get("text") is not None:
             answer = output_result["text"]
-        risk_score = max([user_result["risk_score"]] + [item["risk_score"] for item in document_results])
+        risk_score = max([user_result["risk_score"], output_result["risk_score"]] + [item["risk_score"] for item in document_results])
         trust_values = [item["trust_score"] for item in document_results]
         trust_score = round(sum(trust_values) / len(trust_values)) if trust_values else user_result["trust_score"]
         decision = "BLOCK" if blocked_sources else ("SANITIZE" if any(item["decision"] == "SANITIZE" for item in document_results) else "ALLOW")
+        stage_status = {
+            "input_scan": "PASS",
+            "retrieval": "PASS" if retrieved else "WARNING",
+            "document_scan": "BLOCK" if blocked_sources else ("PASS" if retrieved else "WARNING"),
+            "safe_context": "PASS" if safe_documents else "WARNING",
+            "ollama": "PASS" if generated else ("SKIPPED" if not llm_called else "FALLBACK"),
+            "output_scan": "BLOCK" if output_result["decision"] == "BLOCK" else ("SANITIZED" if output_result["sanitized"] else "PASS"),
+        }
+        all_findings = list(user_result["findings"])
+        for item in document_results:
+            all_findings.extend(item["findings"])
+        all_findings.extend(output_result["findings"])
         return {
             "request_id": request_id, "answer": answer, "decision": decision,
             "risk_score": risk_score, "trust_score": trust_score,
             "sources": [item["metadata"].get("source", "unknown") for item in safe_documents],
             "blocked_sources": blocked_sources, "threats": _unique(all_threats),
             "security_explanation": "Blocked retrieved content was excluded before response generation." if blocked_sources else "Retrieved content passed the security policy.",
-            "input": user_result, "documents": document_results, "safe_context": safe_context,
-            "context_blocked": len(blocked_sources), "output_security": output_result,
+            "input": user_result, "documents": document_results, "retrieved_documents": retrieved_documents,
+            "safe_context": safe_context, "context_blocked": len(blocked_sources), "output_security": output_result,
+            "findings": all_findings, "sanitized": output_result["sanitized"] or any(item["decision"] == "SANITIZE" for item in document_results),
+            "llm_provider": "ollama", "llm_model": getattr(self.llm, "model", None), "llm_status": llm_status,
+            "llm_called": llm_called, "llm_latency": llm_latency,
+            "total_latency": round((time.perf_counter() - started) * 1000, 3),
+            "stage_status": stage_status,
+            "stage_latency_ms": {"retrieval": retrieval_latency, "document_firewall": document_latency, "llm": llm_latency},
+            "blocked_reason": "One or more retrieved documents were blocked." if blocked_sources else None,
         }
 
     def health(self) -> Dict[str, Any]:
-        llm_available = self.llm.available()
+        if hasattr(self.llm, "status"):
+            llm_status = self.llm.status()
+        else:
+            llm_status = {"provider": "ollama", "status": "ready" if self.llm.available() else "unavailable", "model": getattr(self.llm, "model", None)}
+        llm_ready = llm_status["status"] == "ready"
         return {
-            "status": "healthy" if llm_available or not self.llm.enabled else "degraded",
+            "status": "healthy" if llm_ready or not getattr(self.llm, "enabled", False) else "degraded",
             "firewall": "ready", "retriever": "ready",
-            "llm": "available" if llm_available else "unavailable",
+            "llm": llm_status,
             "documents": self.retriever.count(),
         }

@@ -41,4 +41,5 @@ include = ["rag_firewall*"]
 ragfw = "rag_firewall.cli:main"
 llm-secgate = "rag_firewall.cli:main"
 ragshield = "rag_firewall.cli:main"
+ragfw-simulate = "rag_firewall.simulation.runner:main"
 
