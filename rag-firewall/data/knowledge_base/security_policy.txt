@@ -1,0 +1,5 @@
+Security Policy
+
+Employees must use multi-factor authentication, keep company devices updated, and report suspected security incidents to the security team immediately. Production credentials must be stored in the approved secret manager and must never be placed in source code or documents.
+
+External links and file downloads should be treated cautiously and checked against approved company sources.

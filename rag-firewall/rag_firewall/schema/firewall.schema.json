@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LLM-SecGate Firewall Config v1",
+  "type": "object",
+  "properties": {
+    "gateway": { "type": "object", "additionalProperties": true },
+    "llm": { "type": "object", "additionalProperties": true },
+    "retrieval": { "type": "object", "additionalProperties": true },
+    "security": { "type": "object", "additionalProperties": true },
+    "scanners": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["regex_injection","indirect_injection","pii","secrets","encoded","url","conflict"] },
+          "patterns": { "type": "array", "items": { "type": "string" } },
+          "extra_patterns": { "type": "array", "items": { "type": "string" } },
+          "min_len": { "type": "integer", "minimum": 1 },
+          "ratio_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+          "allowlist": { "type": "array", "items": { "type": "string" } },
+          "denylist": { "type": "array", "items": { "type": "string" } },
+          "stale_days": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["type"],
+        "additionalProperties": true
+      }
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "action": { "type": "string", "enum": ["allow","deny","rerank"] },
+          "match": { "type": "object" },
+          "weight": {
+            "type": "object",
+            "properties": {
+              "recency": { "type": "number" },
+              "relevance": { "type": "number" },
+              "provenance": { "type": "number" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["name","action"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["scanners","policies"],
+  "additionalProperties": false
+}

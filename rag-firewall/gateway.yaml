@@ -1,0 +1,40 @@
+scanners:
+  - type: regex_injection
+  - type: indirect_injection
+  - type: pii
+  - type: secrets
+  - type: encoded
+  - type: url
+    allowlist: ["docs.myco.com", "intranet.myco.local"]
+    denylist: ["evil.example.com"]
+  - type: conflict
+    stale_days: 120
+
+policies:
+  - name: block_high_sensitivity
+    match: {metadata.sensitivity: "high"}
+    action: deny
+  - name: prefer_recent_versions
+    action: rerank
+    weight: {recency: 0.6, relevance: 0.4, provenance: 0.2}
+
+gateway:
+  risk_threshold: 60
+
+llm:
+  provider: ollama
+  base_url: http://127.0.0.1:11434
+  model: llama3.2:3b
+  enabled: false
+
+retrieval:
+  knowledge_base: data/knowledge_base
+  top_k: 3
+  chunk_size: 900
+
+security:
+  block_prompt_injection: true
+  block_indirect_injection: true
+  redact_pii: true
+  redact_secrets: true
+  block_denylisted_urls: true

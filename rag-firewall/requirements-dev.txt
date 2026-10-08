@@ -1,0 +1,8 @@
+# Development and testing dependencies
+pytest>=7.0
+networkx>=3.2
+httpx>=0.24
+jsonschema>=4.0
+build>=1.0.3
+twine>=4.0.2
+tomli>=2.0.1

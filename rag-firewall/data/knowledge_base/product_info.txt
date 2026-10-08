@@ -1,0 +1,5 @@
+Product Information
+
+The product provides local security inspection for retrieval-augmented generation applications. It scans user input and retrieved documents for prompt injection, secrets, PII, suspicious URLs, and encoded content before approved context reaches an LLM.
+
+The product can run without a hosted service and can optionally use a local Ollama model for answer generation.
